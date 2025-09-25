@@ -1,95 +1,53 @@
-/* global Office, OfficeRuntime */
+/* global Office */
 
-(function () {
-    // Existing helper functions
-    async function getDefault(event) {
-        try {
-            Office.context.mailbox.item.body.getAsync(
-                Office.CoercionType.Html,
-                { asyncContext: event },
-                function (asyncResult) {
-                    if (asyncResult.status === Office.AsyncResultStatus.Succeeded) {
-                        console.log("Body (HTML):", asyncResult.value);
-                    } else {
-                        console.error("Error getting body:", asyncResult.error);
-                    }
-                    event.completed();
-                }
-            );
-        } catch (e) {
-            console.error("getDefault failed:", e);
-            event.completed();
+Office.onReady(function (info) {
+  if (info.host === Office.HostType.Outlook) {
+    console.log("UTM Manager Add-in loaded successfully.");
+  }
+});
+
+// Associate your functions with Office actions
+Office.actions.associate("SetDefaultData", SetDefaultData);
+Office.actions.associate("validateBody", validateBody);
+Office.actions.associate("GetDefault", GetDefault);
+Office.actions.associate("EditSignature", EditSignature);
+
+// -------------------- Functions --------------------
+
+function SetDefaultData(event) {
+  console.log("SetDefaultData called");
+  event.completed();
+}
+
+function validateBody(event) {
+  console.log("validateBody called");
+  event.completed({ allowEvent: true });
+}
+
+function GetDefault(event) {
+  console.log("GetDefault called");
+  event.completed();
+}
+
+// 🆕 EditSignature Function
+function EditSignature(event) {
+  try {
+    const testSignature = "<p>---<br><b>UTM Manager Test Signature</b></p>";
+
+    Office.context.mailbox.item.body.setSignatureAsync(
+      testSignature,
+      { coercionType: "html" },
+      function (asyncResult) {
+        if (asyncResult.status === Office.AsyncResultStatus.Succeeded) {
+          console.log("✅ Signature inserted successfully.");
+        } else {
+          console.error("❌ Error inserting signature:", asyncResult.error);
         }
-    }
-
-    async function setDefaultData(event) {
-        try {
-            Office.context.mailbox.item.body.setAsync(
-                "<p>UTM Parameters applied successfully ✅</p>",
-                { coercionType: Office.CoercionType.Html },
-                function (asyncResult) {
-                    if (asyncResult.status === Office.AsyncResultStatus.Succeeded) {
-                        console.log("Body updated");
-                    } else {
-                        console.error("Error setting body:", asyncResult.error);
-                    }
-                    event.completed();
-                }
-            );
-        } catch (e) {
-            console.error("setDefaultData failed:", e);
-            event.completed();
-        }
-    }
-
-    async function validateBody(event) {
-        try {
-            Office.context.mailbox.item.body.getAsync(
-                Office.CoercionType.Html,
-                { asyncContext: event },
-                function (asyncResult) {
-                    if (asyncResult.status === Office.AsyncResultStatus.Succeeded) {
-                        const body = asyncResult.value || "";
-                        const hasUTM = body.includes("utm_");
-                        console.log("validateBody:", hasUTM ? "✅ UTM found" : "⚠️ No UTM tags");
-                    } else {
-                        console.error("Error validating body:", asyncResult.error);
-                    }
-                    event.completed();
-                }
-            );
-        } catch (e) {
-            console.error("validateBody failed:", e);
-            event.completed();
-        }
-    }
-
-    // 🔥 New function for signature editing
-    async function editSignature(event) {
-        try {
-            Office.context.mailbox.item.setSignatureAsync(
-                "<p>--<br>Best Regards,<br><strong>Your UTM Signature</strong></p>",
-                { coercionType: Office.CoercionType.Html },
-                function (asyncResult) {
-                    if (asyncResult.status === Office.AsyncResultStatus.Succeeded) {
-                        console.log("Signature set successfully");
-                    } else {
-                        console.error("Error setting signature:", asyncResult.error);
-                    }
-                    event.completed();
-                }
-            );
-        } catch (e) {
-            console.error("editSignature failed:", e);
-            event.completed();
-        }
-    }
-
-    // Register actions with Office.js
-    Office.actions.associate("GetDefault", getDefault);
-    Office.actions.associate("SetDefaultData", setDefaultData);
-    Office.actions.associate("validateBody", validateBody);
-
-    // 👇 Newly added registration for signature
-    Office.actions.associate("EditSignature", editSignature);
-})();
+        event.completed(); // Always complete the event
+      }
+    );
+  } catch (err) {
+    console.error("❌ EditSignature exception:", err);
+    event.completed();
+  }
+}
