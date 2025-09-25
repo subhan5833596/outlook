@@ -102,46 +102,56 @@ function updateUrlInBody() {
   });
 }
 
-// UPDATE ALL LINKS IN BODY WITH UTM
-function updateUrlInSignature() {
-  const campaign = document.getElementById("utm_campaign").value;
-  const source = document.getElementById("utm_source").value;
-  const medium = document.getElementById("utm_medium").value;
-  const content = document.getElementById("utm_content").value;
-  const term = document.getElementById("utm_term").value;
+function updateUTMInSignature() {
+  const campaign = document.getElementById("utm_campaign").value || "";
+  const source = document.getElementById("utm_source").value || "";
+  const medium = document.getElementById("utm_medium").value || "";
+  const content = document.getElementById("utm_content").value || "";
+  const term = document.getElementById("utm_term").value || "";
 
-  const utm = { utm_campaign: campaign, utm_source: source, utm_medium: medium, utm_content: content };
-  if(term) utm.utm_term = term;
+  const utm = `utm_campaign=${encodeURIComponent(campaign)}&utm_source=${encodeURIComponent(source)}&utm_medium=${encodeURIComponent(medium)}&utm_content=${encodeURIComponent(content)}&utm_term=${encodeURIComponent(term)}`;
 
-  Office.context.mailbox.item.body.getAsync("html", res => {
-    if(res.status !== Office.AsyncResultStatus.Succeeded) return alert("❌ Could not read body: " + res.error.message);
+  Office.context.mailbox.item.body.getAsync("html", function(res) {
+    if (res.status === Office.AsyncResultStatus.Succeeded) {
+      let body = res.value;
 
-    let body = res.value;
+      // Find signature block inserted by add-in
+      const sigRegex = /<!--\s*utm-signature-start\s*-->([\s\S]*?)<!--\s*utm-signature-end\s*-->/i;
+      const sigMatch = body.match(sigRegex);
 
-    // Replace all links
-    body = body.replace(/href="([^"]+)"/g, (match, urlStr) => {
-      try {
-        let url = new URL(urlStr);
-        Object.keys(utm).forEach(k => url.searchParams.set(k, utm[k]));
-        return `href="${url.toString()}"`;
-      } catch(e) {
-        return match; // skip invalid URLs
-      }
-    });
+      if (sigMatch) {
+        let signatureHTML = sigMatch[1];
 
-    Office.context.mailbox.item.body.setAsync(body, { coercionType: "html" }, setRes => {
-      if(setRes.status === Office.AsyncResultStatus.Succeeded) {
-        console.log("✅ All signature links updated with UTM!");
-        Office.context.mailbox.item.notificationMessages.replaceAsync("utmMsg", {
-          type: "informationalMessage",
-          message: "✅ All links updated with UTM!",
-          icon: "Icon.16x16",
-          persistent: false
+        // Replace all href links in signature
+        signatureHTML = signatureHTML.replace(/<a\b[^>]*\bhref=["']?([^"'>]+)["']?[^>]*>/gi, (match, url) => {
+          try {
+            let newUrl = new URL(url, "https://dummybase.com"); // dummy base for relative URLs
+            newUrl.search = utm; // replace query string
+            return match.replace(url, newUrl.toString().replace("https://dummybase.com", ""));
+          } catch (e) {
+            return match; // skip invalid URLs
+          }
         });
+
+        // Replace the signature block in body
+        const newBody = body.replace(sigRegex, `<!-- utm-signature-start -->${signatureHTML}<!-- utm-signature-end -->`);
+
+        // Set updated body
+        Office.context.mailbox.item.body.setAsync(newBody, { coercionType: Office.CoercionType.Html }, function(setRes) {
+          if (setRes.status === Office.AsyncResultStatus.Succeeded) {
+            console.log("✅ Signature links updated with UTM!");
+          } else {
+            console.error("❌ Failed updating signature links:", setRes.error);
+          }
+        });
+
       } else {
-        console.error("❌ Failed updating links:", setRes.error);
-        alert("❌ Failed updating links: " + setRes.error.message);
+        console.log("No signature block found in the body.");
       }
-    });
+
+    } else {
+      console.error("❌ Could not fetch email body:", res.error);
+    }
   });
 }
+
