@@ -2,19 +2,26 @@ Office.onReady(() => {
   if (!Office.context.mailbox.item) return;
   let item = Office.context.mailbox.item;
 
-  // Correct element IDs from HTML
+  // Auto-fill fields
   const campaignEl = document.getElementById("utm_campaign");
   const sourceEl = document.getElementById("utm_source");
   const mediumEl = document.getElementById("utm_medium");
   const contentEl = document.getElementById("utm_content");
   const termEl = document.getElementById("utm_term");
 
-  // Auto-fill values safely
   campaignEl.value = (item.to && item.to.length) ? item.to.map(t => t.emailAddress).join(", ") : "";
   sourceEl.value = (item.from && item.from.emailAddress) ? item.from.emailAddress : "";
   mediumEl.value = "email-" + new Date().toISOString().replace(/[:T]/g, "-").slice(0,16);
   contentEl.value = item.subject || "";
   termEl.value = "";
+
+  // Update URL button
+  document.getElementById("updateUrlBtn").onclick = updateUrlInSignature;
+
+  // ✅ Attach the signature help button here
+  document.getElementById("openSigHelpBtn").onclick = () => {
+    window.open("https://support.microsoft.com/en-us/office/create-and-add-an-email-signature-in-outlook-for-windows-53f5e0d4-5a23-4a4e-8a90-5d9188e0d1b3", "_blank");
+  };
 });
 
 
