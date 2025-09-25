@@ -8,91 +8,41 @@
   <script src="https://appsforoffice.microsoft.com/lib/1.1/hosted/office.js"></script>
   <link rel="stylesheet" href="https://res-1.cdn.office.net/files/fabric-cdn-prod_20230815.002/office-ui-fabric-core/11.1.0/css/fabric.min.css"/>
   <link href="cf3de4bbca769e4999ad.css" rel="stylesheet"/>
-  <script defer="defer" src="polyfill.js"></script>
-  <script defer="defer" src="taskpane.js"></script>
-  <!-- extra.js should load AFTER taskpane.js so it can attach to existing handlers -->
-  <script defer="defer" src="extra.js"></script>
-
-  <style>
-    /* Modal styles */
-    #signatureModal {
-      display: none;
-      position: fixed;
-      z-index: 9999;
-      left: 0; top: 0; right: 0; bottom: 0;
-      background: rgba(0,0,0,0.4);
-      align-items: center;
-      justify-content: center;
-    }
-    #signatureModal .modal-content {
-      background: #fff;
-      padding: 16px;
-      width: 90%;
-      max-width: 700px;
-      border-radius: 6px;
-    }
-    #signatureEditor { width:100%; height:200px; padding:8px; box-sizing:border-box; }
-    .modal-actions { display:flex; gap:10px; justify-content:flex-end; margin-top:10px; }
-    .btn { padding:8px 14px; border-radius:4px; border:none; cursor:pointer; }
-    .btn.primary { background:#1373f1; color:#fff; }
-    .btn.secondary { background:#e1e1e1; color:#222; }
-  </style>
+  <script defer src="taskpane.js"></script>
 </head>
 <body class="ms-font-m ms-welcome ms-Fabric" style="background-color:#fff">
   <main id="app-body" class="ms-welcome__main" style="display:block;padding:20px">
-    <div style="display:flex;justify-self:center">
-      <h2 style="margin-bottom:20px">UTM Manager</h2>
-    </div>
+    <h2 style="margin-bottom:20px">UTM Manager</h2>
 
-    <div class="ms-TextField ms-TextField--underlined" style="margin-bottom:15px;display:grid">
+    <div class="ms-TextField ms-TextField--underlined" style="margin-bottom:15px">
       <label class="ms-Label" for="utm_campaign">Campaign</label>
-      <input id="utm_campaign" name="utm_campaign" placeholder="Campaign" style="padding:7px;border:solid 1px gray;border-radius:4px;margin-top:4px">
+      <input id="utm_campaign" placeholder="Campaign" style="padding:7px;border:solid 1px gray;border-radius:4px;margin-top:4px">
     </div>
 
-    <div class="ms-TextField ms-TextField--underlined" style="margin-bottom:15px;display:grid">
+    <div class="ms-TextField ms-TextField--underlined" style="margin-bottom:15px">
       <label class="ms-Label" for="utm_source">Source</label>
-      <input id="utm_source" name="utm_source" placeholder="Source" style="padding:7px;border:solid 1px gray;border-radius:4px;margin-top:4px">
+      <input id="utm_source" placeholder="Source" style="padding:7px;border:solid 1px gray;border-radius:4px;margin-top:4px">
     </div>
 
-    <div class="ms-TextField ms-TextField--underlined" style="margin-bottom:15px;display:grid">
+    <div class="ms-TextField ms-TextField--underlined" style="margin-bottom:15px">
       <label class="ms-Label" for="utm_medium">Medium</label>
-      <input id="utm_medium" name="utm_medium" placeholder="Medium" style="padding:7px;border:solid 1px gray;border-radius:4px;margin-top:4px">
+      <input id="utm_medium" placeholder="Medium" style="padding:7px;border:solid 1px gray;border-radius:4px;margin-top:4px">
     </div>
 
-    <div class="ms-TextField ms-TextField--underlined" style="margin-bottom:15px;display:grid">
+    <div class="ms-TextField ms-TextField--underlined" style="margin-bottom:15px">
       <label class="ms-Label" for="utm_content">Content</label>
-      <input id="utm_content" name="utm_content" placeholder="Content" style="padding:7px;border:solid 1px gray;border-radius:4px;margin-top:4px">
+      <input id="utm_content" placeholder="Content" style="padding:7px;border:solid 1px gray;border-radius:4px;margin-top:4px">
     </div>
 
-    <div class="ms-TextField ms-TextField--underlined" style="margin-bottom:15px;display:grid">
+    <div class="ms-TextField ms-TextField--underlined" style="margin-bottom:15px">
       <label class="ms-Label" for="utm_term">Term</label>
-      <input id="utm_term" name="utm_term" placeholder="Term" style="padding:7px;border:solid 1px gray;border-radius:4px;margin-top:4px">
+      <input id="utm_term" placeholder="Term" style="padding:7px;border:solid 1px gray;border-radius:4px;margin-top:4px">
     </div>
 
-    <div style="display:flex;justify-content:center;gap:12px">
-      <button id="updateUrlBtn">Update URL</button>
-<script>
-  document.getElementById("updateUrlBtn").onclick = updateUrlInSignature;
-</script>
-
-
-      <!-- NEW BUTTON: Edit Signature -->
-      <button id="EditSignatureBtn" class="ms-Button" style="margin-top:20px;background-color:#666;border:none;color:#fff;padding:10px 24px;border-radius:2px">
-        Edit Signature
-      </button>
+    <div style="display:flex;justify-content:center;gap:12px;margin-top:20px">
+      <button id="updateUrlBtn" class="ms-Button">Update URL</button>
+      <button id="openSigHelpBtn" class="ms-Button" style="background-color:#666;color:#fff;">Open Outlook Signature Settings</button>
     </div>
   </main>
-
-  <!-- Modal for signature editor -->
-  <div id="signatureModal">
-    <div class="modal-content">
-      <h3>Edit Signature (HTML allowed)</h3>
-      <textarea id="signatureEditor" placeholder="Paste signature HTML or edit text here"></textarea>
-      <div class="modal-actions">
-        <button id="CancelSig" class="btn secondary">Cancel</button>
-        <button id="SaveSig" class="btn primary">Done & Insert</button>
-      </div>
-    </div>
-  </div>
 </body>
 </html>
