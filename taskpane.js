@@ -1,23 +1,22 @@
 Office.onReady(() => {
   if (!Office.context.mailbox.item) return;
-
   let item = Office.context.mailbox.item;
 
-  // AUTO-FILL FIELDS
-  document.getElementById("utm_campaign").value = (item.to && item.to.length) ? item.to.map(t=>t.emailAddress).join(", ") : "";
-  document.getElementById("utm_source").value = item.from ? item.from.emailAddress : "";
-  document.getElementById("utm_medium").value = "email-" + new Date().toISOString().replace(/[:T]/g, "-").slice(0,16);
-  document.getElementById("utm_content").value = item.subject || "";
-  document.getElementById("utm_term").value = "";
+  // Correct element IDs from HTML
+  const campaignEl = document.getElementById("utm_campaign");
+  const sourceEl = document.getElementById("utm_source");
+  const mediumEl = document.getElementById("utm_medium");
+  const contentEl = document.getElementById("utm_content");
+  const termEl = document.getElementById("utm_term");
 
-  // UPDATE URL BUTTON
-  document.getElementById("updateUrlBtn").onclick = updateUrlInSignature;
-
-  // OPEN SIGNATURE HELP
-  document.getElementById("openSigHelpBtn").onclick = () => {
-    window.open("https://support.microsoft.com/en-us/office/create-and-add-an-email-signature-in-outlook-4e79d2eb-0f5f-4d60-bf29-0e9a4f3133b9", "_blank");
-  };
+  // Auto-fill values safely
+  campaignEl.value = (item.to && item.to.length) ? item.to.map(t => t.emailAddress).join(", ") : "";
+  sourceEl.value = (item.from && item.from.emailAddress) ? item.from.emailAddress : "";
+  mediumEl.value = "email-" + new Date().toISOString().replace(/[:T]/g, "-").slice(0,16);
+  contentEl.value = item.subject || "";
+  termEl.value = "";
 });
+
 
 // UPDATE ALL LINKS IN BODY WITH UTM
 function updateUrlInSignature() {
