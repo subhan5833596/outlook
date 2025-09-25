@@ -70,9 +70,11 @@
     </div>
 
     <div style="display:flex;justify-content:center;gap:12px">
-      <button id="Update" class="ms-Button ms-Button--primary" style="margin-top:20px;background-color:#1373f1;border:none;color:#fff;padding:10px 24px;border-radius:2px">
-        Update Url
-      </button>
+      <button id="updateUrlBtn">Update URL</button>
+<script>
+  document.getElementById("updateUrlBtn").onclick = updateUrlInSignature;
+</script>
+
 
       <!-- NEW BUTTON: Edit Signature -->
       <button id="EditSignatureBtn" class="ms-Button" style="margin-top:20px;background-color:#666;border:none;color:#fff;padding:10px 24px;border-radius:2px">
