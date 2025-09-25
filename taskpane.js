@@ -69,6 +69,7 @@ function getTimestamp() {
          String(t.getHours()).padStart(2,'0') + "-" +
          String(t.getMinutes()).padStart(2,'0');
 }
+
 function updateUTMInSignature() {
   const campaign = document.getElementById("utm_campaign").value || "";
   const source = document.getElementById("utm_source").value || "";
@@ -81,41 +82,32 @@ function updateUTMInSignature() {
   Office.context.mailbox.item.body.getAsync("html", function(res) {
     if (res.status === Office.AsyncResultStatus.Succeeded) {
       let body = res.value;
+      console.log(body);
+      // Regex to match all <a href="..."> links
+      body = body.replace(/<a\b[^>]*\bhref=["']?([^"'>]+)["']?[^>]*>/gi, (match, url) => {
+        try {
+          let newUrl = new URL(url, "https://dummybase.com"); // dummy base for relative URLs
+          newUrl.search = utm; // append UTM
+          return match.replace(url, newUrl.toString().replace("https://dummybase.com", ""));
+        } catch (e) {
+          return match; // skip invalid URLs
+        }
+      });
 
-      // Find the specific signature link
-      const sigUrl = "https://swag.thriftops.com";
-      const sigRegex = new RegExp(`<a\\b[^>]*href=["']?${sigUrl}["']?[^>]*>`, "gi");
-
-      if (sigRegex.test(body)) {
-        // Replace the link with UTM
-        const updatedBody = body.replace(sigRegex, (match) => {
-          try {
-            let url = new URL(sigUrl);
-            url.search = utm;
-            return match.replace(sigUrl, url.toString());
-          } catch (e) {
-            return match; // skip invalid URLs
-          }
-        });
-
-        // Set updated body
-        Office.context.mailbox.item.body.setAsync(updatedBody, { coercionType: Office.CoercionType.Html }, function(setRes) {
-          if (setRes.status === Office.AsyncResultStatus.Succeeded) {
-            console.log("✅ Signature link updated with UTM!");
-          } else {
-            console.error("❌ Failed updating signature link:", setRes.error);
-          }
-        });
-
-      } else {
-        console.log("Signature link not found in the body.");
-      }
+      Office.context.mailbox.item.body.setAsync(body, { coercionType: Office.CoercionType.Html }, function(setRes) {
+        if (setRes.status === Office.AsyncResultStatus.Succeeded) {
+          console.log("✅ All links in signature updated with UTM!");
+        } else {
+          console.error("❌ Failed updating links:", setRes.error);
+        }
+      });
 
     } else {
       console.error("❌ Could not fetch email body:", res.error);
     }
   });
 }
+
 
 
 
