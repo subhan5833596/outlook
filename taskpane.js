@@ -1,29 +1,106 @@
-Office.onReady(() => {
-  if (!Office.context.mailbox.item) return;
-  let item = Office.context.mailbox.item;
-
-  // Auto-fill fields
-  const campaignEl = document.getElementById("utm_campaign");
-  const sourceEl = document.getElementById("utm_source");
-  const mediumEl = document.getElementById("utm_medium");
-  const contentEl = document.getElementById("utm_content");
-  const termEl = document.getElementById("utm_term");
-
-  campaignEl.value = (item.to && item.to.length) ? item.to.map(t => t.emailAddress).join(", ") : "";
-  sourceEl.value = (item.from && item.from.emailAddress) ? item.from.emailAddress : "";
-  mediumEl.value = "email-" + new Date().toISOString().replace(/[:T]/g, "-").slice(0,16);
-  contentEl.value = item.subject || "";
-  termEl.value = "";
-
-  // Update URL button
-  document.getElementById("updateUrlBtn").onclick = updateUrlInSignature;
-
-  // ✅ Attach the signature help button here
-  document.getElementById("openSigHelpBtn").onclick = () => {
-    window.open("https://support.microsoft.com/en-us/office/create-and-add-an-email-signature-in-outlook-for-windows-53f5e0d4-5a23-4a4e-8a90-5d9188e0d1b3", "_blank");
-  };
+Office.onReady(function() {
+  if (Office.context.mailbox.item) {
+    populateFields();
+    document.getElementById("Update").onclick = updateUrlInBody;
+  }
 });
 
+// Async function to populate the fields
+async function populateFields() {
+  try {
+    let item = Office.context.mailbox.item;
+
+    // Get To recipients for Campaign
+    const toRecipients = await getRecipientsAsync(item.to);
+    document.getElementById("utm_campaign").value = toRecipients.join(",") || "";
+
+    // Source is current user email
+    document.getElementById("utm_source").value = Office.context.mailbox.userProfile.emailAddress || "";
+
+    // Medium = email + timestamp
+    document.getElementById("utm_medium").value = "email-" + getTimestamp();
+
+    // Content = email subject
+    const subject = await getSubjectAsync(item.subject);
+    document.getElementById("utm_content").value = subject || "";
+
+    // Term = CC recipients
+    const ccRecipients = await getRecipientsAsync(item.cc);
+    document.getElementById("utm_term").value = ccRecipients.join(",") || "";
+  } catch (err) {
+    console.error("Error populating UTM fields:", err);
+  }
+}
+
+// Helper to get recipients asynchronously
+function getRecipientsAsync(getAsyncFunc) {
+  return new Promise((resolve, reject) => {
+    getAsyncFunc.getAsync(function(res) {
+      if (res.status === Office.AsyncResultStatus.Succeeded) {
+        const emails = res.value.map(r => r.emailAddress);
+        resolve(emails);
+      } else {
+        reject(res.error);
+      }
+    });
+  });
+}
+
+// Helper to get subject asynchronously
+function getSubjectAsync(subjectObj) {
+  return new Promise((resolve, reject) => {
+    subjectObj.getAsync(function(res) {
+      if (res.status === Office.AsyncResultStatus.Succeeded) resolve(res.value);
+      else reject(res.error);
+    });
+  });
+}
+
+// Generate timestamp
+function getTimestamp() {
+  let t = new Date();
+  return t.getFullYear() + "-" +
+         String(t.getMonth()+1).padStart(2,'0') + "-" +
+         String(t.getDate()).padStart(2,'0') + "_" +
+         String(t.getHours()).padStart(2,'0') + "-" +
+         String(t.getMinutes()).padStart(2,'0');
+}
+
+// Update all links in email body with UTM
+function updateUrlInBody() {
+  const campaign = document.getElementById("utm_campaign").value || "";
+  const source = document.getElementById("utm_source").value || "";
+  const medium = document.getElementById("utm_medium").value || "";
+  const content = document.getElementById("utm_content").value || "";
+  const term = document.getElementById("utm_term").value || "";
+
+  const utm = `utm_campaign=${encodeURIComponent(campaign)}&utm_source=${encodeURIComponent(source)}&utm_medium=${encodeURIComponent(medium)}&utm_content=${encodeURIComponent(content)}&utm_term=${encodeURIComponent(term)}`;
+
+  Office.context.mailbox.item.body.getAsync("html", function(res) {
+    if (res.status === Office.AsyncResultStatus.Succeeded) {
+      let body = res.value;
+
+      // Replace all href links with UTM
+      body = body.replace(/href="([^"]+)"/g, (match, p1) => {
+        try {
+          let url = new URL(p1);
+          url.search = utm;
+          return `href="${url.toString()}"`;
+        } catch (e) {
+          return match; // skip invalid URLs
+        }
+      });
+
+      Office.context.mailbox.item.body.setAsync(body, { coercionType: Office.CoercionType.Html }, function(setRes) {
+        if (setRes.status === Office.AsyncResultStatus.Succeeded) {
+          console.log("✅ All links updated with UTM!");
+        } else {
+          console.error("❌ Failed updating links:", setRes.error);
+        }
+      });
+    }
+  });
+}
 
 // UPDATE ALL LINKS IN BODY WITH UTM
 function updateUrlInSignature() {
