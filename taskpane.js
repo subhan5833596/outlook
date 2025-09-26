@@ -107,6 +107,64 @@ function updateUTMInSignature() {
     }
   });
 }
+let quill;
+
+// Open modal + init Quill
+document.getElementById("openEditorBtn").onclick = () => {
+  document.getElementById("editorModal").style.display = "block";
+
+  if (!quill) {
+    quill = new Quill('#quillEditor', {
+      theme: 'snow',
+      modules: {
+        toolbar: [
+          ['bold', 'italic', 'underline', 'strike'],
+          [{ 'font': [] }, { 'size': [] }],
+          [{ 'color': [] }, { 'background': [] }],
+          [{ 'align': [] }],
+          ['link', 'image'],
+          [{ 'list': 'ordered' }, { 'list': 'bullet' }]
+        ]
+      }
+    });
+
+    // Load saved signature into editor
+    const savedSig = localStorage.getItem("customSignature") || "";
+    if (savedSig) {
+      quill.root.innerHTML = savedSig;
+    }
+  }
+};
+
+// Close modal
+function closeEditor() {
+  document.getElementById("editorModal").style.display = "none";
+}
+
+// Save signature
+document.getElementById("saveSignatureBtn").onclick = () => {
+  const sigHTML = quill.root.innerHTML;
+  localStorage.setItem("customSignature", sigHTML);
+  alert("✅ Signature saved!");
+  closeEditor();
+};
+
+// Insert saved signature into email
+function insertSignature() {
+  const sigHTML = localStorage.getItem("customSignature") || "";
+  if (!sigHTML) {
+    alert("⚠️ No signature saved yet!");
+    return;
+  }
+
+  Office.context.mailbox.item.body.appendOnSendAsync(sigHTML, { coercionType: "html" }, (res) => {
+    if (res.status === Office.AsyncResultStatus.Succeeded) {
+      console.log("✅ Signature inserted into email.");
+    } else {
+      console.error("❌ Failed to insert signature:", res.error);
+    }
+  });
+}
 
 
 
