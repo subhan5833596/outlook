@@ -141,30 +141,42 @@ function closeEditor() {
   document.getElementById("editorModal").style.display = "none";
 }
 
-// Save signature
 document.getElementById("saveSignatureBtn").onclick = () => {
   const sigHTML = quill.root.innerHTML;
   localStorage.setItem("customSignature", sigHTML);
-  alert("✅ Signature saved!");
-  closeEditor();
+
+  // Show success message instead of alert
+  document.getElementById("statusMsg").innerText = "✅ Signature saved!";
+  
+  // Auto-hide modal after 1 sec
+  setTimeout(() => {
+    document.getElementById("editorModal").style.display = "none";
+    document.getElementById("statusMsg").innerText = "";
+  }, 1000);
 };
+
 
 // Insert saved signature into email
 function insertSignature() {
   const sigHTML = localStorage.getItem("customSignature") || "";
   if (!sigHTML) {
-    alert("⚠️ No signature saved yet!");
+    document.getElementById("statusMsg").innerText = "⚠️ No signature saved yet!";
     return;
   }
 
-  Office.context.mailbox.item.body.appendOnSendAsync(sigHTML, { coercionType: "html" }, (res) => {
-    if (res.status === Office.AsyncResultStatus.Succeeded) {
-      console.log("✅ Signature inserted into email.");
-    } else {
-      console.error("❌ Failed to insert signature:", res.error);
+  Office.context.mailbox.item.body.appendOnSendAsync(
+    sigHTML,
+    { coercionType: "html" },
+    (res) => {
+      if (res.status === Office.AsyncResultStatus.Succeeded) {
+        document.getElementById("statusMsg").innerText = "✅ Signature added to email!";
+      } else {
+        document.getElementById("statusMsg").innerText = "❌ Failed: " + res.error.message;
+      }
     }
-  });
+  );
 }
+
 
 
 
