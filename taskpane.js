@@ -157,7 +157,6 @@ document.getElementById("saveSignatureBtn").onclick = () => {
 };
 
 
-// Insert saved signature into email
 function insertSignature() {
   const sigHTML = localStorage.getItem("customSignature") || "";
   if (!sigHTML) {
@@ -165,14 +164,15 @@ function insertSignature() {
     return;
   }
 
-  Office.context.mailbox.item.body.appendOnSendAsync(
+  Office.context.mailbox.item.body.setSelectedDataAsync(
     sigHTML,
-    { coercionType: "html" },
+    { coercionType: Office.CoercionType.Html },
     (res) => {
       if (res.status === Office.AsyncResultStatus.Succeeded) {
-        document.getElementById("statusMsg").innerText = "✅ Signature added to email!";
+        document.getElementById("statusMsg").innerText = "✅ Signature inserted into email!";
       } else {
         document.getElementById("statusMsg").innerText = "❌ Failed: " + res.error.message;
+        console.error(res.error);
       }
     }
   );
