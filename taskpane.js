@@ -148,7 +148,10 @@ document.getElementById("saveSignatureBtn").onclick = () => {
 
   // Show success message instead of alert
   document.getElementById("statusMsg").innerText = "✅ Signature saved!";
-  
+
+  // Insert signature into email right after saving
+  insertSignature();
+
   // Auto-hide modal after 1 sec
   setTimeout(() => {
     document.getElementById("editorModal").style.display = "none";
@@ -157,10 +160,11 @@ document.getElementById("saveSignatureBtn").onclick = () => {
 };
 
 
+
 function insertSignature() {
   const sigHTML = localStorage.getItem("customSignature") || "";
   if (!sigHTML) {
-    document.getElementById("statusMsg").innerText = "⚠️ No signature saved yet!";
+    console.log("⚠️ No signature saved yet!");
     return;
   }
 
@@ -169,9 +173,9 @@ function insertSignature() {
     { coercionType: Office.CoercionType.Html },
     (res) => {
       if (res.status === Office.AsyncResultStatus.Succeeded) {
-        document.getElementById("statusMsg").innerText = "✅ Signature inserted into email!";
+        console.log("✅ Signature inserted into email!");
       } else {
-        document.getElementById("statusMsg").innerText = "❌ Failed: " + res.error.message;
+        console.log("❌ Failed: " + res.error.message);
         console.error(res.error);
       }
     }
