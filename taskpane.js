@@ -142,22 +142,42 @@ function closeEditor() {
   document.getElementById("editorModal").style.display = "none";
 }
 
+
 document.getElementById("saveSignatureBtn").onclick = () => {
   const sigHTML = quill.root.innerHTML;
   localStorage.setItem("customSignature", sigHTML);
 
-  // Show success message instead of alert
-  document.getElementById("statusMsg").innerText = "✅ Signature saved!";
+  // Wrap signature so we can replace it next time
+  const wrappedSig = `<div id="custom-signature">${sigHTML}</div>`;
 
-  // Insert signature into email right after saving
-  insertSignature();
+  Office.context.mailbox.item.body.getAsync("html", (res) => {
+    if (res.status === Office.AsyncResultStatus.Succeeded) {
+      let body = res.value;
 
-  // Auto-hide modal after 1 sec
-  setTimeout(() => {
-    document.getElementById("editorModal").style.display = "none";
-    document.getElementById("statusMsg").innerText = "";
-  }, 1000);
+      // Remove old signature if exists
+      body = body.replace(/<div id="custom-signature">[\s\S]*?<\/div>/, "");
+
+      // Add new signature at the end
+      const updatedBody = body + wrappedSig;
+
+      Office.context.mailbox.item.body.setAsync(
+        updatedBody,
+        { coercionType: Office.CoercionType.Html },
+        (setRes) => {
+          if (setRes.status === Office.AsyncResultStatus.Succeeded) {
+            console.log("✅ Signature saved & replaced!");
+          } else {
+            console.error("❌ Failed to insert signature:", setRes.error);
+          }
+        }
+      );
+    }
+  });
+
+  // Close modal after save
+  document.getElementById("editorModal").style.display = "none";
 };
+
 
 
 
