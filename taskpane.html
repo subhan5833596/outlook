@@ -15,8 +15,7 @@
   display: none;
   position: fixed;
   z-index: 9999;
-  top: 0; left: 0;
-  width: 100%; height: 100%;
+  inset: 0;
   background-color: rgba(0,0,0,0.5);
 
   display: flex;
@@ -25,17 +24,58 @@
   padding: 10px;
 }
 
-/* Modal content */
+/* Modal box */
 #editorModal .modal-content {
   background: #fff;
-  border-radius: 8px;
+  border-radius: 10px;
   width: 90%;
   max-width: 700px;
   height: auto;
   max-height: 90vh;
-  overflow-y: auto;
-  padding: 15px;
+  display: flex;
+  flex-direction: column;
+  padding: 20px;
   box-sizing: border-box;
+  overflow: hidden;
+}
+
+/* Quill editor should flex properly */
+#quillEditor {
+  flex: 1;
+  min-height: 200px;
+  max-height: 60vh;
+  border: 1px solid #ddd;
+  border-radius: 6px;
+  overflow-y: auto;
+}
+
+/* Actions area */
+.modal-actions {
+  margin-top: 15px;
+  display: flex;
+  justify-content: flex-end;
+  gap: 10px;
+}
+
+.modal-actions .cancel-btn {
+  background: #f3f3f3;
+  color: #333;
+}
+
+/* Mobile tweaks */
+@media (max-width: 600px) {
+  #editorModal .modal-content {
+    width: 100%;
+    height: 100%;
+    max-width: none;
+    max-height: none;
+    border-radius: 0;
+    padding: 15px;
+  }
+
+  #quillEditor {
+    max-height: 70vh;
+  }
 }
 
   </style>
@@ -87,27 +127,22 @@
       </button>
 
       <!-- Modal -->
-      <div
-        id="editorModal"
-      >
-        <div
-        >
-          <h3>Edit Signature</h3>
-          <!-- Quill editor container -->
-          <div id="quillEditor" style="height: 400px"></div>
+<div id="editorModal">
+  <div class="modal-content">
+    <h3>Edit Signature</h3>
 
-          <div style="margin-top: 10px; text-align: right">
-            <button id="saveSignatureBtn" class="ms-Button">Save</button>
-            <button
-              onclick="closeEditor()"
-              class="ms-Button"
-              style="margin-left: 10px"
-            >
-              Cancel
-            </button>
-          </div>
-        </div>
-      </div>
+    <!-- Quill editor container -->
+    <div id="quillEditor" style="height: 300px"></div>
+
+    <div class="modal-actions">
+      <button id="saveSignatureBtn" class="ms-Button">Save</button>
+      <button onclick="closeEditor()" class="ms-Button cancel-btn">
+        Cancel
+      </button>
+    </div>
+  </div>
+</div>
+
     <div id="statusMsg" style="margin-top:10px; color:green; font-weight:bold;"></div>
 
   </main>
