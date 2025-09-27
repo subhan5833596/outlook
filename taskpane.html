@@ -9,6 +9,36 @@
   <link rel="stylesheet" href="https://res-1.cdn.office.net/files/fabric-cdn-prod_20230815.002/office-ui-fabric-core/11.1.0/css/fabric.min.css"/>
   <link href="cf3de4bbca769e4999ad.css" rel="stylesheet"/>
   <script defer src="taskpane.js"></script>
+  <style>
+    /* Modal overlay */
+#editorModal {
+  display: none;
+  position: fixed;
+  z-index: 9999;
+  top: 0; left: 0;
+  width: 100%; height: 100%;
+  background-color: rgba(0,0,0,0.5);
+
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 10px;
+}
+
+/* Modal content */
+#editorModal .modal-content {
+  background: #fff;
+  border-radius: 8px;
+  width: 90%;
+  max-width: 700px;
+  height: auto;
+  max-height: 90vh;
+  overflow-y: auto;
+  padding: 15px;
+  box-sizing: border-box;
+}
+
+  </style>
 </head>
 <body class="ms-font-m ms-welcome ms-Fabric" style="background-color:#fff">
   <main id="app-body" class="ms-welcome__main" style="display:block;padding:20px">
@@ -59,26 +89,8 @@
       <!-- Modal -->
       <div
         id="editorModal"
-        style="
-          display: none;
-          position: fixed;
-          top: 0;
-          left: 0;
-          width: 100%;
-          height: 100%;
-          background: rgba(0, 0, 0, 0.6);
-        "
       >
         <div
-          style="
-            background: #fff;
-            width: 70%;
-            height: 80%;
-            margin: 5% auto;
-            padding: 20px;
-            border-radius: 8px;
-            position: relative;
-          "
         >
           <h3>Edit Signature</h3>
           <!-- Quill editor container -->
