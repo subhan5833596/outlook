@@ -179,8 +179,6 @@ document.getElementById("saveSignatureBtn").onclick = () => {
 };
 
 
-
-
 function insertSignature() {
   const sigHTML = localStorage.getItem("customSignature") || "";
   if (!sigHTML) {
@@ -188,19 +186,32 @@ function insertSignature() {
     return;
   }
 
-  Office.context.mailbox.item.body.setSelectedDataAsync(
-    sigHTML,
-    { coercionType: Office.CoercionType.Html },
-    (res) => {
-      if (res.status === Office.AsyncResultStatus.Succeeded) {
-        console.log("✅ Signature inserted into email!");
-      } else {
-        console.log("❌ Failed: " + res.error.message);
-        console.error(res.error);
-      }
+  Office.context.mailbox.item.body.getAsync("html", (res) => {
+    if (res.status === Office.AsyncResultStatus.Succeeded) {
+      let currentBody = res.value;
+
+      // 🔥 Purani signature remove karo (jo bhi id="custom-signature" ho)
+      currentBody = currentBody.replace(/<div[^>]*id="[^"]*custom-signature"[^>]*>[\s\S]*?<\/div>/gi, "");
+
+      // 🔥 Nayi signature append karo
+      const newBody = currentBody + `<div id="custom-signature">${sigHTML}</div>`;
+
+      Office.context.mailbox.item.body.setAsync(
+        newBody,
+        { coercionType: Office.CoercionType.Html },
+        (res2) => {
+          if (res2.status === Office.AsyncResultStatus.Succeeded) {
+            console.log("✅ Signature replaced successfully!");
+          } else {
+            console.error("❌ Error inserting signature:", res2.error);
+          }
+        }
+      );
     }
-  );
+  });
 }
+
+
 
 
 
