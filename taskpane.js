@@ -2,9 +2,6 @@ Office.onReady(function() {
   if (Office.context.mailbox.item) {
     populateFields();
     document.getElementById("updateUrlBtn").onclick = updateUTMInSignature; // signature only
-    document.getElementById("openSigHelpBtn").onclick = () => {
-      window.open("https://support.microsoft.com/en-us/office/create-and-add-an-email-signature-in-outlook-for-windows-53f5e0d4-5a23-4a4e-8a90-5d9188e0d1b3", "_blank");
-    };
   }
 });
 
