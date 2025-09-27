@@ -143,42 +143,21 @@ function closeEditor() {
 }
 
 
+// Save Signature (only in localStorage, not in body)
 document.getElementById("saveSignatureBtn").onclick = () => {
   const sigHTML = quill.root.innerHTML;
   localStorage.setItem("customSignature", sigHTML);
 
-  // Wrap signature so we can replace it next time
-  const wrappedSig = `<div id="custom-signature">${sigHTML}</div>`;
-
-  Office.context.mailbox.item.body.getAsync("html", (res) => {
-    if (res.status === Office.AsyncResultStatus.Succeeded) {
-      let body = res.value;
-
-      // Remove old signature if exists
-      body = body.replace(/<div id="custom-signature">[\s\S]*?<\/div>/, "");
-
-      // Add new signature at the end
-      const updatedBody = body + wrappedSig;
-
-      Office.context.mailbox.item.body.setAsync(
-        updatedBody,
-        { coercionType: Office.CoercionType.Html },
-        (setRes) => {
-          if (setRes.status === Office.AsyncResultStatus.Succeeded) {
-            console.log("✅ Signature saved & replaced!");
-          } else {
-            console.error("❌ Failed to insert signature:", setRes.error);
-          }
-        }
-      );
-    }
-  });
+  console.log("✅ Signature saved in localStorage");
 
   // Close modal after save
   document.getElementById("editorModal").style.display = "none";
+
+  // Insert signature in email
+  insertSignature();
 };
 
-
+// Insert signature into email body (replace if exists)
 function insertSignature() {
   const sigHTML = localStorage.getItem("customSignature") || "";
   if (!sigHTML) {
@@ -190,10 +169,13 @@ function insertSignature() {
     if (res.status === Office.AsyncResultStatus.Succeeded) {
       let currentBody = res.value;
 
-      // 🔥 Purani signature remove karo (jo bhi id="custom-signature" ho)
-      currentBody = currentBody.replace(/<div[^>]*id="[^"]*custom-signature"[^>]*>[\s\S]*?<\/div>/gi, "");
+      // Remove ALL old signatures
+      currentBody = currentBody.replace(
+        /<div[^>]*id="[^"]*custom-signature"[^>]*>[\s\S]*?<\/div>/gi,
+        ""
+      );
 
-      // 🔥 Nayi signature append karo
+      // Add fresh one at the end
       const newBody = currentBody + `<div id="custom-signature">${sigHTML}</div>`;
 
       Office.context.mailbox.item.body.setAsync(
@@ -210,7 +192,6 @@ function insertSignature() {
     }
   });
 }
-
 
 
 
