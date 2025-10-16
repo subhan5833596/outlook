@@ -113,6 +113,15 @@ function getTimestamp() {
 // }
 
 function updateUTMInSignature() {
+  // 🎯 Step 3: Skip processing for meeting invites
+  if (
+    Office.context.mailbox.item.itemType ===
+    Office.MailboxEnums.ItemType.Appointment
+  ) {
+    console.log("📅 Detected meeting invite — skipping UTM update.");
+    return;
+  }
+
   const campaign = document.getElementById("utm_campaign").value || "";
   const source = document.getElementById("utm_source").value || "";
   const medium = document.getElementById("utm_medium").value || "";
