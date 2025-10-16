@@ -140,7 +140,8 @@ function getTimestamp() {
 //   });
 // }
 
-function updateUTMInSignature() {
+// ✅ Final: Update UTM inside Signature Only
+async function updateUTMInSignature() {
   // 🎯 Step 3: Skip processing for meeting invites
   if (
     Office.context.mailbox.item.itemType ===
@@ -150,19 +151,14 @@ function updateUTMInSignature() {
     return;
   }
 
+  // 🆕 Always refresh UTM fields before updating
+  await populateFields();
+
   const campaign = document.getElementById("utm_campaign").value || "";
   const source = document.getElementById("utm_source").value || "";
   const medium = document.getElementById("utm_medium").value || "";
   const content = document.getElementById("utm_content").value || "";
   const term = document.getElementById("utm_term").value || "";
-
-  const utm = `utm_campaign=${encodeURIComponent(
-    campaign
-  )}&utm_source=${encodeURIComponent(source)}&utm_medium=${encodeURIComponent(
-    medium
-  )}&utm_content=${encodeURIComponent(content)}&utm_term=${encodeURIComponent(
-    term
-  )}`;
 
   Office.context.mailbox.item.body.getAsync("html", function (res) {
     if (res.status !== Office.AsyncResultStatus.Succeeded) {
@@ -176,9 +172,8 @@ function updateUTMInSignature() {
     const sigMatch = body.match(
       /<div[^>]*(id|class)=["'][^"']*custom-signature[^"']*["'][^>]*>([\s\S]*?)<\/div>/i
     );
-
     if (!sigMatch) {
-      console.log("⚠️NO signature block found — skipping UTM update.");
+      console.log("⚠️ No signature block found — skipping UTM update.");
       return;
     }
 
@@ -239,7 +234,7 @@ function updateUTMInSignature() {
       }
     );
 
-    // 🎯 Step 3: Put updated signature back into body
+    // 🎯 Step 5: Put updated signature back into body
     body = body.replace(
       sigMatch[0],
       `<div id="custom-signature">${signatureHtml}</div>`
