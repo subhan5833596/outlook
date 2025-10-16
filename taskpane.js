@@ -167,10 +167,8 @@ function updateUTMInSignature() {
       /<a\b[^>]*href=["']?([^"'>]+)["']?[^>]*>/gi,
       (match, url) => {
         try {
-          // Skip mailto or tel links
           if (url.startsWith("mailto:") || url.startsWith("tel:")) return match;
 
-          // 🛑 Skip meeting or calendar links
           const lowerUrl = url.toLowerCase();
           const meetingDomains = [
             "teams.microsoft.com",
@@ -182,18 +180,26 @@ function updateUTMInSignature() {
             "meet.jit.si",
           ];
 
-          // If URL contains any meeting domain or 'meeting' keyword → skip
           if (
             meetingDomains.some((domain) => lowerUrl.includes(domain)) ||
             lowerUrl.includes("meeting")
           ) {
             console.log("📅 Skipping meeting link:", url);
-            return match; // leave unchanged
+            return match;
           }
 
-          // ✅ Append or replace with UTM params for all other links
+          // ✅ Step 4: Preserve existing parameters
           const newUrl = new URL(url, "https://dummybase.com");
-          newUrl.search = utm;
+          const params = new URLSearchParams(newUrl.search);
+
+          params.set("utm_campaign", campaign);
+          params.set("utm_source", source);
+          params.set("utm_medium", medium);
+          params.set("utm_content", content);
+          params.set("utm_term", term);
+
+          newUrl.search = params.toString();
+
           return match.replace(
             url,
             newUrl.toString().replace("https://dummybase.com", "")
