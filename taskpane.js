@@ -147,7 +147,13 @@ function updateUTMInSignature() {
 
     let signatureHtml = sigMatch[2];
 
-    // 🎯 Step 2: Replace only links inside the signature
+    // 🎯 Step 2: Check if signature has any <a> links
+    if (!/<a\b[^>]*href=/i.test(signatureHtml)) {
+      console.log("ℹ️ No URLs found in signature — skipping UTM update.");
+      return;
+    }
+
+    // 🎯 Step 3: Replace only links inside the signature
     signatureHtml = signatureHtml.replace(
       /<a\b[^>]*href=["']?([^"'>]+)["']?[^>]*>/gi,
       (match, url) => {
