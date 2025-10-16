@@ -3,7 +3,7 @@
   xmlns:bt="http://schemas.microsoft.com/office/officeappbasictypes/1.0"
   xmlns:mailappor="http://schemas.microsoft.com/office/mailappversionoverrides/1.0" xsi:type="MailApp">
   <Id>b4d083e7-d5b9-492f-bc26-be54a61873d6</Id>
-  <Version>1.0.0.7</Version>
+  <Version>2.0.0.0</Version>
   <ProviderName>CentreBlock</ProviderName>
   <DefaultLocale>en-US</DefaultLocale>
   <DisplayName DefaultValue="UTM-Tags"/>

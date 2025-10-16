@@ -7,6 +7,11 @@
 
 // ✅ Step 6: Load UTM Manager only for supported accounts and mail compose items
 Office.onReady(function (info) {
+  if (!Office.context.mailbox || !Office.context.mailbox.item) {
+    console.warn("⚠️ Office context not ready yet — skipping init");
+    return;
+  }
+
   if (info.host === Office.HostType.Outlook) {
     const mailbox = Office.context.mailbox;
 
@@ -278,10 +283,14 @@ document.getElementById("openEditorBtn").onclick = () => {
     });
 
     // Load saved signature into editor
-    const savedSig = localStorage.getItem("customSignature") || "";
-    if (savedSig) {
-      quill.root.innerHTML = savedSig;
-    }
+    OfficeRuntime.storage
+      .getItem("customSignature")
+      .then((savedSig) => {
+        if (savedSig) {
+          quill.root.innerHTML = savedSig;
+        }
+      })
+      .catch((err) => console.error("⚠️ Failed to load saved signature:", err));
   }
 };
 
@@ -290,23 +299,76 @@ function closeEditor() {
   document.getElementById("editorModal").style.display = "none";
 }
 
-// Save Signature (only in localStorage, not in body)
-document.getElementById("saveSignatureBtn").onclick = () => {
+// // Save Signature (only in localStorage, not in body)
+// document.getElementById("saveSignatureBtn").onclick = () => {
+//   const sigHTML = quill.root.innerHTML;
+//   localStorage.setItem("customSignature", sigHTML);
+
+//   console.log("✅ Signature saved in localStorage");
+
+//   // Close modal after save
+//   document.getElementById("editorModal").style.display = "none";
+
+//   // Insert signature in email
+//   insertSignature();
+// };
+
+// ✅ Save Signature using OfficeRuntime.storage (cross-platform safe)
+document.getElementById("saveSignatureBtn").onclick = async () => {
   const sigHTML = quill.root.innerHTML;
-  localStorage.setItem("customSignature", sigHTML);
 
-  console.log("✅ Signature saved in localStorage");
+  try {
+    await OfficeRuntime.storage.setItem("customSignature", sigHTML);
+    console.log("✅ Signature saved in OfficeRuntime storage");
+  } catch (e) {
+    console.error("❌ Failed to save signature:", e);
+  }
 
-  // Close modal after save
   document.getElementById("editorModal").style.display = "none";
-
-  // Insert signature in email
   insertSignature();
 };
 
 // Insert signature into email body (replace if exists)
-function insertSignature() {
-  const sigHTML = localStorage.getItem("customSignature") || "";
+// function insertSignature() {
+//   const sigHTML = await OfficeRuntime.storage.getItem("customSignature") || "";
+
+//   if (!sigHTML) {
+//     console.log("⚠️ No signature saved yet!");
+//     return;
+//   }
+
+//   Office.context.mailbox.item.body.getAsync("html", (res) => {
+//     if (res.status === Office.AsyncResultStatus.Succeeded) {
+//       let currentBody = res.value;
+
+//       // Remove ALL old signatures
+//       currentBody = currentBody.replace(
+//         /<div[^>]*id="[^"]*custom-signature"[^>]*>[\s\S]*?<\/div>/gi,
+//         ""
+//       );
+
+//       // Add fresh one at the end
+//       const newBody =
+//         currentBody + `<div id="custom-signature">${sigHTML}</div>`;
+
+//       Office.context.mailbox.item.body.setAsync(
+//         newBody,
+//         { coercionType: Office.CoercionType.Html },
+//         (res2) => {
+//           if (res2.status === Office.AsyncResultStatus.Succeeded) {
+//             console.log("✅ Signature replaced successfully!");
+//           } else {
+//             console.error("❌ Error inserting signature:", res2.error);
+//           }
+//         }
+//       );
+//     }
+//   });
+// }
+
+async function insertSignature() {
+  const sigHTML =
+    (await OfficeRuntime.storage.getItem("customSignature")) || "";
   if (!sigHTML) {
     console.log("⚠️ No signature saved yet!");
     return;
@@ -316,13 +378,11 @@ function insertSignature() {
     if (res.status === Office.AsyncResultStatus.Succeeded) {
       let currentBody = res.value;
 
-      // Remove ALL old signatures
       currentBody = currentBody.replace(
         /<div[^>]*id="[^"]*custom-signature"[^>]*>[\s\S]*?<\/div>/gi,
         ""
       );
 
-      // Add fresh one at the end
       const newBody =
         currentBody + `<div id="custom-signature">${sigHTML}</div>`;
 
