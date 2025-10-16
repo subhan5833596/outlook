@@ -141,7 +141,7 @@ function updateUTMInSignature() {
     );
 
     if (!sigMatch) {
-      console.log("⚠️ No signature block found — skipping UTM update.");
+      console.log("⚠️NO No signature block found — skipping UTM update.");
       return;
     }
 
