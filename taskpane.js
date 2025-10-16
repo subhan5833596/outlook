@@ -170,8 +170,30 @@ function updateUTMInSignature() {
           // Skip mailto or tel links
           if (url.startsWith("mailto:") || url.startsWith("tel:")) return match;
 
+          // 🛑 Skip meeting or calendar links
+          const lowerUrl = url.toLowerCase();
+          const meetingDomains = [
+            "teams.microsoft.com",
+            "zoom.us",
+            "meet.google.com",
+            "outlook.office.com/calendar",
+            "webex.com",
+            "gotomeeting.com",
+            "meet.jit.si",
+          ];
+
+          // If URL contains any meeting domain or 'meeting' keyword → skip
+          if (
+            meetingDomains.some((domain) => lowerUrl.includes(domain)) ||
+            lowerUrl.includes("meeting")
+          ) {
+            console.log("📅 Skipping meeting link:", url);
+            return match; // leave unchanged
+          }
+
+          // ✅ Append or replace with UTM params for all other links
           const newUrl = new URL(url, "https://dummybase.com");
-          newUrl.search = utm; // Replace query with our UTM set
+          newUrl.search = utm;
           return match.replace(
             url,
             newUrl.toString().replace("https://dummybase.com", "")
