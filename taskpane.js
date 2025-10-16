@@ -137,7 +137,7 @@ function updateUTMInSignature() {
 
     // 🎯 Step 1: Locate the signature block
     const sigMatch = body.match(
-      /<div[^>]*id=["']custom-signature["'][^>]*>([\s\S]*?)<\/div>/i
+      /<div[^>]*(id|class)=["'][^"']*custom-signature[^"']*["'][^>]*>([\s\S]*?)<\/div>/i
     );
 
     if (!sigMatch) {
@@ -145,7 +145,7 @@ function updateUTMInSignature() {
       return;
     }
 
-    let signatureHtml = sigMatch[1];
+    let signatureHtml = sigMatch[2];
 
     // 🎯 Step 2: Replace only links inside the signature
     signatureHtml = signatureHtml.replace(
