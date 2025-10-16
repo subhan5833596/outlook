@@ -283,14 +283,21 @@ document.getElementById("openEditorBtn").onclick = () => {
     });
 
     // Load saved signature into editor
-    OfficeRuntime.storage
-      .getItem("customSignature")
-      .then((savedSig) => {
+    (async () => {
+      try {
+        let savedSig = "";
+        if (typeof OfficeRuntime !== "undefined" && OfficeRuntime.storage) {
+          savedSig = await OfficeRuntime.storage.getItem("customSignature");
+        } else {
+          savedSig = localStorage.getItem("customSignature");
+        }
         if (savedSig) {
           quill.root.innerHTML = savedSig;
         }
-      })
-      .catch((err) => console.error("⚠️ Failed to load saved signature:", err));
+      } catch (err) {
+        console.error("⚠️ Failed to load saved signature:", err);
+      }
+    })();
   }
 };
 
@@ -318,8 +325,13 @@ document.getElementById("saveSignatureBtn").onclick = async () => {
   const sigHTML = quill.root.innerHTML;
 
   try {
-    await OfficeRuntime.storage.setItem("customSignature", sigHTML);
-    console.log("✅ Signature saved in OfficeRuntime storage");
+    if (typeof OfficeRuntime !== "undefined" && OfficeRuntime.storage) {
+      await OfficeRuntime.storage.setItem("customSignature", sigHTML);
+      console.log("✅ Signature saved in OfficeRuntime storage");
+    } else {
+      localStorage.setItem("customSignature", sigHTML);
+      console.log("✅ Signature saved in localStorage (fallback)");
+    }
   } catch (e) {
     console.error("❌ Failed to save signature:", e);
   }
@@ -367,8 +379,17 @@ document.getElementById("saveSignatureBtn").onclick = async () => {
 // }
 
 async function insertSignature() {
-  const sigHTML =
-    (await OfficeRuntime.storage.getItem("customSignature")) || "";
+  let sigHTML = "";
+  try {
+    if (typeof OfficeRuntime !== "undefined" && OfficeRuntime.storage) {
+      sigHTML = (await OfficeRuntime.storage.getItem("customSignature")) || "";
+    } else {
+      sigHTML = localStorage.getItem("customSignature") || "";
+    }
+  } catch (e) {
+    console.error("⚠️ Failed to load signature:", e);
+  }
+
   if (!sigHTML) {
     console.log("⚠️ No signature saved yet!");
     return;
