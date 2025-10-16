@@ -1,7 +1,35 @@
-Office.onReady(function () {
-  if (Office.context.mailbox.item) {
+// Office.onReady(function () {
+//   if (Office.context.mailbox.item) {
+//     populateFields();
+//     document.getElementById("updateUrlBtn").onclick = updateUTMInSignature; // signature only
+//   }
+// });
+
+// ✅ Step 6: Load UTM Manager only for supported accounts and mail compose items
+Office.onReady(function (info) {
+  if (info.host === Office.HostType.Outlook) {
+    const mailbox = Office.context.mailbox;
+
+    // Skip unsupported item types (e.g., meeting invites)
+    const itemType = mailbox.item?.itemType;
+    if (itemType && itemType !== Office.MailboxEnums.ItemType.Message) {
+      console.log("🚫 Not a mail compose item — UTM Manager disabled.");
+      return;
+    }
+
+    // Skip unsupported account types (adjust regex as per your environment)
+    const userEmail = mailbox.userProfile?.emailAddress || "";
+    if (!/@(outlook\.com|office365\.com|yourcompany\.com)$/i.test(userEmail)) {
+      console.log("🚫 Unsupported account detected:", userEmail);
+      return;
+    }
+
+    // ✅ All checks passed — initialize UTM Manager
+    console.log(
+      "✅ Supported account and item type — initializing UTM Manager."
+    );
     populateFields();
-    document.getElementById("updateUrlBtn").onclick = updateUTMInSignature; // signature only
+    document.getElementById("updateUrlBtn").onclick = updateUTMInSignature;
   }
 });
 
