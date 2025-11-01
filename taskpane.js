@@ -218,15 +218,21 @@ async function updateUTMInSignature() {
 
           // ✅ Step 4: Preserve existing parameters
           const newUrl = new URL(url, "https://dummybase.com");
-          const params = new URLSearchParams(newUrl.search);
+          // ✅ Step: Clean old UTM parameters before setting new ones
+const params = new URLSearchParams(newUrl.search);
 
-          params.set("utm_campaign", campaign);
-          params.set("utm_source", source);
-          params.set("utm_medium", medium);
-          params.set("utm_content", content);
-          params.set("utm_term", term);
+// Remove any existing UTM parameters first
+["utm_campaign", "utm_source", "utm_medium", "utm_content", "utm_term"].forEach(p => params.delete(p));
 
-          newUrl.search = params.toString();
+// Then set the fresh values
+params.set("utm_campaign", campaign);
+params.set("utm_source", source);
+params.set("utm_medium", medium);
+params.set("utm_content", content);
+params.set("utm_term", term);
+
+newUrl.search = params.toString();
+
 
           return match.replace(
             url,
