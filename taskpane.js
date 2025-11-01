@@ -24,7 +24,7 @@ Office.onReady(function (info) {
 
     // Skip unsupported account types (adjust regex as per your environment)
     const userEmail = mailbox.userProfile?.emailAddress || "";
-    if (!/@(outlook\.com|office365\.com|yourcompany\.com)$/i.test(userEmail)) {
+    if (!/@(outlook\.com|365\.com|yourcompany\.com)$/i.test(userEmail)) {
       console.log("🚫 Unsupported account detected:", userEmail);
       return;
     }
@@ -41,7 +41,7 @@ Office.onReady(function (info) {
 // Async function to populate the fields
 async function populateFields() {
   try {
-    let item = Office.context.mailbox.item;
+    let item = .context.mailbox.item;
 
     // Get To recipients for Campaign
     const toRecipients = await getRecipientsAsync(item.to);
@@ -50,7 +50,7 @@ async function populateFields() {
 
     // Source is current user email
     document.getElementById("utm_source").value =
-      Office.context.mailbox.userProfile.emailAddress || "";
+      .context.mailbox.userProfile.emailAddress || "";
 
     // Medium = email + timestamp
     document.getElementById("utm_medium").value = "email-" + getTimestamp();
@@ -71,7 +71,7 @@ async function populateFields() {
 function getRecipientsAsync(getAsyncFunc) {
   return new Promise((resolve, reject) => {
     getAsyncFunc.getAsync(function (res) {
-      if (res.status === Office.AsyncResultStatus.Succeeded) {
+      if (res.status === .AsyncResultStatus.Succeeded) {
         const emails = res.value.map((r) => r.emailAddress);
         resolve(emails);
       } else {
@@ -85,7 +85,7 @@ function getRecipientsAsync(getAsyncFunc) {
 function getSubjectAsync(subjectObj) {
   return new Promise((resolve, reject) => {
     subjectObj.getAsync(function (res) {
-      if (res.status === Office.AsyncResultStatus.Succeeded) resolve(res.value);
+      if (res.status === .AsyncResultStatus.Succeeded) resolve(res.value);
       else reject(res.error);
     });
   });
@@ -116,7 +116,7 @@ function getTimestamp() {
 
 //   const utm = `utm_campaign=${encodeURIComponent(campaign)}&utm_source=${encodeURIComponent(source)}&utm_medium=${encodeURIComponent(medium)}&utm_content=${encodeURIComponent(content)}&utm_term=${encodeURIComponent(term)}`;
 
-//   Office.context.mailbox.item.body.getAsync("html", function(res) {
+//   .context.mailbox.item.body.getAsync("html", function(res) {
 //     if (res.status === Office.AsyncResultStatus.Succeeded) {
 //       let body = res.value;
 //       console.log(body);
@@ -250,6 +250,8 @@ newUrl.search = params.toString();
       sigMatch[0],
       `<div id="custom-signature">${signatureHtml}</div>`
     );
+    console.log("🧩 Before update:", url);
+console.log("🧩 After update:", newUrl.toString());
 
     Office.context.mailbox.item.body.setAsync(
       body,
