@@ -250,8 +250,7 @@ newUrl.search = params.toString();
       sigMatch[0],
       `<div id="custom-signature">${signatureHtml}</div>`
     );
-    console.log("🧩 Before update:", url);
-console.log("🧩 After update:", newUrl.toString());
+   
 
     Office.context.mailbox.item.body.setAsync(
       body,
