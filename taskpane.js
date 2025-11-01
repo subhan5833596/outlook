@@ -218,22 +218,27 @@ async function updateUTMInSignature() {
             return match;
           }
 
-          // ✅ Step 4: Preserve existing parameters
-          const newUrl = new URL(url, "https://dummybase.com");
-          const params = new URLSearchParams(newUrl.search);
+          // ✅ Step 4: Preserve existing parameters safely and reapply clean UTMs
+let cleanUrl = url.replace(/&amp;/g, "&"); // decode HTML entities
+const newUrl = new URL(cleanUrl, "https://dummybase.com");
+const params = new URLSearchParams(newUrl.search);
 
-          params.set("utm_campaign", campaign);
-          params.set("utm_source", source);
-          params.set("utm_medium", medium);
-          params.set("utm_content", content);
-          params.set("utm_term", term);
+// Remove any existing UTM parameters
+["utm_campaign", "utm_source", "utm_medium", "utm_content", "utm_term"].forEach(p => params.delete(p));
 
-          newUrl.search = params.toString();
+// Add fresh ones
+params.set("utm_campaign", campaign);
+params.set("utm_source", source);
+params.set("utm_medium", medium);
+params.set("utm_content", content);
+params.set("utm_term", term);
 
-          return match.replace(
-            url,
-            newUrl.toString().replace("https://dummybase.com", "")
-          );
+// Assign back
+newUrl.search = params.toString();
+
+// Return cleaned link
+const finalUrl = newUrl.toString().replace("https://dummybase.com", "").replace(/&amp;/g, "&");
+return match.replace(url, finalUrl);
         } catch (e) {
           console.warn("⚠️ Invalid or non-HTTP URL skipped:", url);
           return match;
