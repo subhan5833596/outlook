@@ -5,6 +5,8 @@
 //   }
 // });
 
+
+
 // ✅ Step 6: Load UTM Manager only for supported accounts and mail compose items
 Office.onReady(function (info) {
   if (!Office.context.mailbox || !Office.context.mailbox.item) {
