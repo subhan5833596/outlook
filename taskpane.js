@@ -159,7 +159,7 @@ async function updateUTMInSignature() {
   }
 
   // 🆕 Always refresh UTM fields before updating
-  await populateFields();
+  // await populateFields();
 
   const campaign = document.getElementById("utm_campaign").value || "";
   const source = document.getElementById("utm_source").value || "";
