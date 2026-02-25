@@ -219,8 +219,17 @@ async function updateUTMInSignature() {
           }
 
           // ✅ Step 4: Preserve existing parameters safely and reapply clean UTMs
+          
+// let cleanUrl = url.replace(/&amp;/g, "&"); // decode HTML entities
+// const newUrl = new URL(cleanUrl, "https://dummybase.com");
 let cleanUrl = url.replace(/&amp;/g, "&"); // decode HTML entities
-const newUrl = new URL(cleanUrl, "https://dummybase.com");
+
+// 🔥 FIX: Force absolute URL
+if (!/^https?:\/\//i.test(cleanUrl)) {
+  cleanUrl = "https://" + cleanUrl;
+}
+
+const newUrl = new URL(cleanUrl);
 const params = new URLSearchParams(newUrl.search);
 
 // Remove any existing UTM parameters
