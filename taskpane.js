@@ -254,10 +254,14 @@ return match.replace(url, finalUrl);
     );
 
     // 🎯 Step 5: Put updated signature back into body
+    //body = body.replace(
+    //  sigMatch[0],
+    //  `<div id="custom-signature">${signatureHtml}</div>`
+    //);
     body = body.replace(
-      sigMatch[0],
-      `<div id="custom-signature">${signatureHtml}</div>`
-    );
+sigMatch[0],
+sigMatch[0].replace(sigMatch[1], signatureHtml)
+);
 
     Office.context.mailbox.item.body.setAsync(
       body,
