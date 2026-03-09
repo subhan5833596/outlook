@@ -171,9 +171,12 @@ async function updateUTMInSignature() {
     let body = res.value;
 
     // 🎯 Step 1: Locate the signature block
+    // const sigMatch = body.match(
+    //  /<div[^>]*(id|class)=["'][^"']*custom-signature[^"']*["'][^>]*>([\s\S]*?)<\/div>/i
+    // );
     const sigMatch = body.match(
-      /<div[^>]*(id|class)=["'][^"']*custom-signature[^"']*["'][^>]*>([\s\S]*?)<\/div>/i
-    );
+/<div[^>]*custom-signature[^>]*>([\s\S]*?)<\/div>/i
+);
     if (!sigMatch) {
       console.log("⚠️ No signature block found — skipping UTM update.");
       return;
