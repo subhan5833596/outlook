@@ -25,11 +25,6 @@ Office.onReady(function (info) {
     }
 
     // Skip unsupported account types (adjust regex as per your environment)
-    const userEmail = mailbox.userProfile?.emailAddress || "";
-    if (!/@(outlook\.com|office365\.com|yourcompany\.com)$/i.test(userEmail)) {
-      console.log("🚫 Unsupported account detected:", userEmail);
-      return;
-    }
 
     // ✅ All checks passed — initialize UTM Manager
     console.log(
