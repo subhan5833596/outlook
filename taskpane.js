@@ -340,7 +340,14 @@ document.getElementById("saveSignatureBtn").onclick = async () => {
 
   try {
     if (typeof OfficeRuntime !== "undefined" && OfficeRuntime.storage) {
-      await OfficeRuntime.storage.setItem("customSignature", sigHTML);
+      // await OfficeRuntime.storage.setItem("customSignature", sigHTML);
+      async function saveSignature(sigHTML) {
+  try {
+    await OfficeRuntime.storage.setItem("customSignature", sigHTML);
+  } catch {
+    localStorage.setItem("customSignature", sigHTML);
+  }
+}
       console.log("✅ Signature saved in OfficeRuntime storage");
     } else {
       localStorage.setItem("customSignature", sigHTML);
